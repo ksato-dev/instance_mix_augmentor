@@ -12,7 +12,16 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10):
         # 背景画像を読み込む
         bg_img = cv2.imread(bg_img_path)
         
-        for ol_img_path in overlay_img_path_list:
+        num_ol_img_path_list = len(overlay_img_path_list)
+        skip_flag_list = [random.randint(0, 1) for _ in range(num_ol_img_path_list)]  # 画像 ID ごとにスキップするかどうかのフラグを作る
+
+        if len(skip_flag_list) == 0:
+            skip_flag_list[random.randint(0, num_ol_img_path_list-1)] = 1 # 一個もオーバーレイがないならどこか一つ使わせる
+
+        for img_id, ol_img_path in enumerate(overlay_img_path_list):
+            skip_flag = skip_flag_list[img_id]
+            if skip_flag == 1:
+                continue
 
             # 透過画像を読み込む
             overlay_img = cv2.imread(ol_img_path, cv2.IMREAD_UNCHANGED)
@@ -54,7 +63,8 @@ bg_img_path = 'background.jpg'
 overlay_img_path = [
     'overlay/obj001.png',
     'overlay/obj002.png',
-    'overlay/obj003.png', ]
+    'overlay/obj003.png',
+    'overlay/obj004.png', ]
 
 # 画像を重ねる関数を実行
 # overlay_image(bg_img_path, overlay_img_path, x, y)
