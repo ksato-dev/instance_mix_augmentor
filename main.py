@@ -15,8 +15,9 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10):
         num_ol_img_path_list = len(overlay_img_path_list)
         skip_flag_list = [random.randint(0, 1) for _ in range(num_ol_img_path_list)]  # 画像 ID ごとにスキップするかどうかのフラグを作る
 
-        if len(skip_flag_list) == 0:
-            skip_flag_list[random.randint(0, num_ol_img_path_list-1)] = 1 # 一個もオーバーレイがないならどこか一つ使わせる
+        if sum(skip_flag_list) == num_ol_img_path_list:
+            print(iter_id, skip_flag_list)
+            skip_flag_list[random.randint(0, num_ol_img_path_list-1)] = 0 # 一個もオーバーレイがないならどこか一つ使わせる
 
         for img_id, ol_img_path in enumerate(overlay_img_path_list):
             skip_flag = skip_flag_list[img_id]
@@ -44,9 +45,6 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10):
 
             # 背景画像の該当部分を切り出す
             bg_roi = bg_img[y:y+overlay_height, x:x+overlay_width]
-
-            # if bg_roi is None:
-            #     continue
 
             # 透過画像を背景画像に重ねる
             for c in range(3):
