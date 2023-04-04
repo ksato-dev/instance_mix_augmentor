@@ -5,6 +5,12 @@ import math
 
 
 def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10, range_pixel_area=None):
+    """
+    * TODO
+        - Move a lump of statement to a function.
+        - Convert this function to a class.
+        - Write an overview of this function.
+    """
     
     for iter_id in range(num_iterations):
         bg_roi = None
@@ -99,5 +105,5 @@ overlay_img_path = [
 # 画像を重ねる関数を実行
 # overlay_image(bg_img_path, overlay_img_path, x, y)
 num_iters = 10
-range_area = [5000, 10000]
+range_area = [5000, 7000]  # [min, max]
 overlay_image(bg_img_path, overlay_img_path, num_iters, range_area)
