@@ -2,14 +2,20 @@ import cv2
 import numpy as np
 import random
 import math
+import sys
+import glob
 
 
 def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10, range_pixel_area=None):
     """
     * TODO
-        - Move a lump of statement to a function.
-        - Convert this function to a class.
-        - Write an overview of this function.
+        -[ ] Move a lump of statement to a function.
+        -[ ] Convert this function to a class.
+        -[ ] Write an overview of this function.
+        -[x] Add a function that rotate an image.
+        -[ ] Add a function that stick instances into boundaries.
+        -[ ] Add a threshold that limit overlaid images.
+        -[ ] Add a function that write a label-file on coco-format.
     """
     
     for iter_id in range(num_iterations):
@@ -37,6 +43,36 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10, range_p
 
             # 透過画像のサイズを取得
             overlay_height, overlay_width = overlay_img.shape[:2]
+
+            # 回転 ---
+            # 画像の中心座標を計算
+            center = (overlay_width // 2, overlay_height // 2)
+
+            # 回転行列を計算
+            angle_deg = random.randint(0, 45)
+            rotation_matrix = cv2.getRotationMatrix2D(center, angle_deg, 1.0)
+
+            # 回転後の画像サイズを計算
+            radians = np.radians(angle_deg)
+            sin_angle = np.sin(radians)
+            cos_angle = np.cos(radians)
+            new_width = int((overlay_height * np.abs(sin_angle)) + (overlay_width * np.abs(cos_angle)))
+            new_height = int((overlay_height * np.abs(cos_angle)) + (overlay_width * np.abs(sin_angle)))
+
+            # 新しい中心座標を計算し、回転行列を調整
+            rotation_matrix[0, 2] += (new_width // 2) - center[0]
+            rotation_matrix[1, 2] += (new_height // 2) - center[1]
+
+            # 画像を回転させ、ゼロパディングを適用する
+            overlay_img = cv2.warpAffine(overlay_img, rotation_matrix, (new_width, new_height))
+
+            overlay_width = new_width        
+            overlay_height = new_height        
+            # overlay_img = cv2.warpAffine(overlay_img, rotation_matrix, (overlay_width, overlay_height))
+
+            # # 画像を回転させる
+            # overlay_img = cv2.warpAffine(overlay_img, rotation_matrix, (overlay_width, overlay_height))
+            # ---
 
             # 面積の範囲指定があればスケールする ---
             if range_pixel_area is not None:
@@ -72,8 +108,8 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10, range_p
             bg_height, bg_width = bg_img.shape[:2]
 
             # x, y の範囲ランダムで決定
-            x = random.randint(0 + overlay_width, bg_width - overlay_width)
-            y = random.randint(0 + overlay_height, bg_height - overlay_height)
+            x = random.randint(0, bg_width - overlay_width)
+            y = random.randint(0, bg_height - overlay_height)
 
             # 透過画像をRGBAに変換
             overlay_img = overlay_img
@@ -95,15 +131,20 @@ def overlay_image(bg_img_path, overlay_img_path_list, num_iterations=10, range_p
 
 
 # 画像のパスを設定
-bg_img_path = 'background.jpg'
-overlay_img_path = [
-    'overlay/obj001.png',
-    'overlay/obj002.png',
-    'overlay/obj003.png',
-    'overlay/obj004.png', ]
+# bg_img_path = 'background.jpg'
+bg_img_path = sys.argv[1]
+overlay_img_path = glob.glob(sys.argv[2] + "/*.png")
+
+# overlay_img_path = [
+#     'overlay/obj001.png',
+#     'overlay/obj002.png',
+#     'overlay/obj003.png',
+#     'overlay/obj004.png', ]
 
 # 画像を重ねる関数を実行
 # overlay_image(bg_img_path, overlay_img_path, x, y)
 num_iters = 10
-range_area = [5000, 7000]  # [min, max]
+# range_area = [5000, 7000]  # [min, max]
+range_area = [2000, 2600]  # [min, max]
+# range_area = None
 overlay_image(bg_img_path, overlay_img_path, num_iters, range_area)
